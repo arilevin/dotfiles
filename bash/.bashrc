@@ -5,7 +5,9 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-source ~/.bashrc_local
+if [ -f ~/.bashrc_local ]; then
+    source ~/.bashrc_local
+fi
 
 # R = colors (ansi escapes); F = don't page if text fits in window; i = case insensitive search
 export LESS='-Ri'
@@ -19,10 +21,10 @@ eval $(dircolors)
 # User specific aliases and functions
 PATH=$HOME/tools:$PATH
 
-alias l='ls -FG'
-alias la='ls -FGa'
-alias ll='ls -FGl'
-alias lla='ls -FGla'
+alias l='ls -FG --color'
+alias la='ls -FGa --color'
+alias ll='ls -FGl --color'
+alias lla='ls -FGla --color'
 
 alias gs='git status'
 alias gl="git log --graph --date-order --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
