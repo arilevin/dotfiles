@@ -1,7 +1,10 @@
-(setq gc-cons-threshold 64000000)
+(setq gc-cons-threshold 402653184
+      gc-cons-percentage 0.6)
+
 (add-hook 'after-init-hook #'(lambda ()
 			       ;; restore after startup
-			       (setq gc-cons-threshold 800000)))
+			       (setq gc-cons-threshold 800000
+                                     gc-cons-percentage .1)))
 ;; Use a hook so the message doesn't get clobbered by other messages.
 (add-hook 'emacs-startup-hook
           (lambda ()
@@ -20,6 +23,7 @@
 			 ("gnu"      . "http://elpa.gnu.org/packages/")
 			 ))
 (package-initialize)
+;(load-file "lisp/bison-mode.el")
 
 ;; Bootstrap `use-package'
 (unless (package-installed-p 'use-package) ; unless it is already installed
@@ -51,6 +55,56 @@
 (defun my/compilation-popup ()
   (interactive)
   (popwin:popup-buffer "*compilation*" :stick t))
+
+(use-package lsp-mode
+  :ensure t
+  )
+(use-package company
+  :ensure t)
+(use-package company-lsp
+  :ensure t
+  :config
+  (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil)
+  )
+(use-package flycheck
+  :ensure t
+  )
+(use-package markdown-mode             ; Apparently required by lsp-ui
+  :ensure t)
+;; (use-package lsp-ui
+;;   :ensure t
+;;   :after lsp-mode
+;;   :config
+;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+;;   )
+
+(use-package cquery
+  :ensure t
+  :after evil
+  :config
+  ;; Arch Linux aur/cquery-git aur/cquery
+  (setq cquery-executable "/usr/bin/cquery"
+  ;; Log file
+  cquery-extra-args '("--log-file=/tmp/cq.log"))
+  ;; Initialization options
+  cquery-extra-init-params '()
+  (evil-define-key 'normal c-mode-map (kbd "M-.") 'xref-find-definitions)
+  (add-to-list 'xref-prompt-for-identifier 'xref-find-references t)
+  (defun cquery//enable ()
+    (when
+        (and buffer-file-name
+             (or (locate-dominating-file default-directory "compile_commands.json")
+                 (locate-dominating-file default-directory ".cquery")))
+      (lsp-cquery-enable)))
+  (add-hook 'c-mode-common-hook #'cquery//enable)
+  )
+
+(use-package helm-xref
+  :ensure t
+  :config
+  (setq xref-show-xrefs-function 'helm-xref-show-xrefs)
+  )
+
 
 ;;
 ;; Org mode
@@ -114,6 +168,9 @@
     (kbd "/")       'evil-search-forward
     (kbd "n")       'evil-search-next
     (kbd "N")       'evil-search-previous
+    (kbd "0")       'evil-digit-argument-or-evil-beginning-of-line
+    (kbd "^")       'evil-first-non-blank
+    (kbd "$")       'evil-end-of-line
     (kbd "C-d")     'evil-scroll-down
     (kbd "C-u")     'evil-scroll-up
     (kbd "C-w C-w") 'other-window)
@@ -157,7 +214,7 @@
  	       `(,(rx bos "*helm" (* not-newline) "*" eos)
  		 (display-buffer-in-side-window)
  		 (inhibit-same-window . t)
- 		 (window-height . 0.3)))
+ 		 (window-height . 0.4)))
 
    (helm-mode 1)
 
@@ -177,7 +234,10 @@
    :after helm
    :defer t   ;; TODO how to mix the delayed load of :bind with use-package?
   ) 
-
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
 
  (defun xah-comment-dwim ()
    "Like `comment-dwim', but toggle comment if cursor is not at end of line.
@@ -258,29 +318,65 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(company-lsp-async t)
+ '(company-lsp-cache-candidates nil)
+ '(company-quickhelp-color-background "#4F4F4F")
+ '(company-quickhelp-color-foreground "#DCDCCC")
+ '(custom-safe-themes
+   (quote
+    ("599f1561d84229e02807c952919cd9b0fbaa97ace123851df84806b067666332" default)))
+ '(fci-rule-color "#383838")
+ '(lsp-highlight-symbol-at-point nil)
+ '(nrepl-message-colors
+   (quote
+    ("#CC9393" "#DFAF8F" "#F0DFAF" "#7F9F7F" "#BFEBBF" "#93E0E3" "#94BFF3" "#DC8CC3")))
  '(package-selected-packages
    (quote
-    (windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window))))
+    (company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
+ '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
+ '(vc-annotate-background "#2B2B2B")
+ '(vc-annotate-color-map
+   (quote
+    ((20 . "#BC8383")
+     (40 . "#CC9393")
+     (60 . "#DFAF8F")
+     (80 . "#D0BF8F")
+     (100 . "#E0CF9F")
+     (120 . "#F0DFAF")
+     (140 . "#5F7F5F")
+     (160 . "#7F9F7F")
+     (180 . "#8FB28F")
+     (200 . "#9FC59F")
+     (220 . "#AFD8AF")
+     (240 . "#BFEBBF")
+     (260 . "#93E0E3")
+     (280 . "#6CA0A3")
+     (300 . "#7CB8BB")
+     (320 . "#8CD0D3")
+     (340 . "#94BFF3")
+     (360 . "#DC8CC3"))))
+ '(vc-annotate-very-old-color "#DC8CC3"))
  
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(aw-leading-char-face ((t (:inherit ace-jump-face-foreground :height 3.0)))))
+ '(aw-leading-char-face ((t (:inherit ace-jump-face-foreground :height 3.0))))
+ '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3")))))
 
  (setq delete-old-versions -1 )          ; delete excess backup versions silently
  (setq version-control t )               ; use version control
  (setq vc-make-backup-files t )          ; make backups file even when in version controlled dir
  (setq backup-directory-alist `(("." . "~/.emacs.d/backups")) ) ; which directory to put backups file
  (setq vc-follow-symlinks t )		; don't ask for confirmation when opening symlinked file
- (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)) ) ;transform backups file name
+ (setq auto-save-file-name-transforms `((".*" "~/.emacs.d/auto-save-list/" t)) ) ;transform backups file name
  (setq inhibit-startup-screen t )	; inhibit useless and old-school startup screen
  (setq ring-bell-function 'ignore )	; silent bell when you make a mistake
  (setq coding-system-for-read 'utf-8 )	; use utf-8 by default
  (setq coding-system-for-write 'utf-8 )
  (setq sentence-end-double-space nil)	; sentence SHOULD end with only a point.
  (setq default-fill-column 80)		; toggle wrapping text at the 80th character
- (defalias 'yes-or-no-p 'y-or-no-p)
+ (defalias 'yes-or-no-p 'y-or-n-p)
  ;; (setq initial-scratch-message "Welcome in Emacs") ; print a default message in the empty scratch buffer opened at startup
 (put 'narrow-to-region 'disabled nil)
