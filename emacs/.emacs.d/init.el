@@ -142,7 +142,9 @@
 (use-package zenburn-theme
   :ensure t
   :config
-  (load-theme 'zenburn t))
+  (load-theme 'zenburn t)
+  (global-hl-line-mode))
+
 (use-package avy :ensure t
   :commands (avy-goto-word-1))
 (use-package swiper :ensure t)
@@ -205,7 +207,8 @@
      ("M-x" . helm-M-x)
      )
    :config
-   (setq helm-ff-file-name-history-use-recentf t)
+   (setq helm-ff-file-name-history-use-recentf t
+         helm-buffer-max-length 40)     ; make file name column wider
    (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 
    ;; Make Helm open at the bottom with height=40%
@@ -311,6 +314,7 @@
 
 
  (windmove-default-keybindings)
+ (xterm-mouse-mode)                     ; Enable the mouse in the terminal
 
  
 (custom-set-variables
@@ -363,7 +367,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(aw-leading-char-face ((t (:inherit ace-jump-face-foreground :height 3.0))))
- '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3")))))
+ '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3"))))
+ '(hl-line ((t (:background "#525252" :weight bold)))))
 
  (setq delete-old-versions -1 )          ; delete excess backup versions silently
  (setq version-control t )               ; use version control
