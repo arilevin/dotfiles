@@ -205,6 +205,7 @@
     (("C-x C-f" . helm-find-files)
      ("C-x b" . helm-buffers-list)
      ("M-x" . helm-M-x)
+     ("M-s s" . helm-occur)
      )
    :config
    (setq helm-ff-file-name-history-use-recentf t
@@ -231,6 +232,8 @@
  (use-package helm-ag :ensure t
    :after helm
    :config
+   (setq helm-ag-insert-at-point 'symbol
+         helm-ag-use-agignore t)
    )
  (use-package helm-ls-git
    :ensure t
@@ -277,9 +280,10 @@
   :non-normal-prefix "C-SPC"
   "/" 'helm-do-ag
   "?" 'helm-do-ag-project-root
-  "b" '(:ignore t :which-key "buffers")
+  "b" '(:ignore t :which-key "buffers/bookmarks")
   "bb" 'helm-buffers-list
   "bk" 'kill-buffer  ; change buffer, chose using ivy
+  "bm" 'helm-bookmarks
   "f" '(:ignore t :which-key "files")
   "ff" 'helm-find-files
   "fr" 'helm-recentf
