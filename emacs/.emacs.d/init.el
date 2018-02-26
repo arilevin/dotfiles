@@ -23,7 +23,6 @@
 			 ("gnu"      . "http://elpa.gnu.org/packages/")
 			 ))
 (package-initialize)
-;(load-file "lisp/bison-mode.el")
 
 ;; Bootstrap `use-package'
 (unless (package-installed-p 'use-package) ; unless it is already installed
@@ -49,23 +48,24 @@
 (setq c-default-style "linux"
       c-basic-offset 4)
 (setq-default indent-tabs-mode nil)   ;; no tabs
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; Open .h files in c++-mode
+;; (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; Open .h files in c++-mode
 (define-key c-mode-base-map (kbd "RET") 'newline-and-indent)
 (setq compilation-ask-about-save nil)
 (defun my/compilation-popup ()
   (interactive)
-  (popwin:popup-buffer "*compilation*" :stick t))
+  (popwin:popup-buffer "*compilation*" :stick t :height 30))
 
-(use-package lsp-mode
-  :ensure t
-  )
-(use-package company
-  :ensure t)
-(use-package company-lsp
-  :ensure t
-  :config
-  (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil)
-  )
+;; (use-package lsp-mode
+;;   :ensure t
+;;   )
+
+;; (use-package company
+;;   :ensure t)
+;; (use-package company-lsp
+;;   :ensure t
+;;   :config
+;;   (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil)
+;;   )
 (use-package flycheck
   :ensure t
   )
@@ -78,26 +78,26 @@
 ;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
 ;;   )
 
-(use-package cquery
-  :ensure t
-  :after evil
-  :config
-  ;; Arch Linux aur/cquery-git aur/cquery
-  (setq cquery-executable "/usr/bin/cquery"
-  ;; Log file
-  cquery-extra-args '("--log-file=/tmp/cq.log"))
-  ;; Initialization options
-  cquery-extra-init-params '()
-  (evil-define-key 'normal c-mode-map (kbd "M-.") 'xref-find-definitions)
-  (add-to-list 'xref-prompt-for-identifier 'xref-find-references t)
-  (defun cquery//enable ()
-    (when
-        (and buffer-file-name
-             (or (locate-dominating-file default-directory "compile_commands.json")
-                 (locate-dominating-file default-directory ".cquery")))
-      (lsp-cquery-enable)))
-  (add-hook 'c-mode-common-hook #'cquery//enable)
-  )
+;; (use-package cquery
+;;   :ensure t
+;;   :after evil
+;;   :config
+;;   ;; Arch Linux aur/cquery-git aur/cquery
+;;   (setq cquery-executable "/usr/bin/cquery"
+;;   ;; Log file
+;;   cquery-extra-args '("--log-file=/tmp/cq.log"))
+;;   ;; Initialization options
+;;   cquery-extra-init-params '()
+;;   (evil-define-key 'normal c-mode-map (kbd "M-.") 'xref-find-definitions)
+;;   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t)
+;;   (defun cquery//enable ()
+;;     (when
+;;         (and buffer-file-name
+;;              (or (locate-dominating-file default-directory "compile_commands.json")
+;;                  (locate-dominating-file default-directory ".cquery")))
+;;       (lsp-cquery-enable)))
+;;   (add-hook 'c-mode-common-hook #'cquery//enable)
+;;   )
 
 (use-package helm-xref
   :ensure t
@@ -105,6 +105,14 @@
   (setq xref-show-xrefs-function 'helm-xref-show-xrefs)
   )
 
+
+(use-package yasnippet
+  :ensure t)
+(use-package elpy
+  :ensure t
+  :config
+  (elpy-enable)
+  )
 
 ;;
 ;; Org mode
@@ -142,7 +150,9 @@
 (use-package zenburn-theme
   :ensure t
   :config
-  (load-theme 'zenburn t))
+  (load-theme 'zenburn t)
+  (global-hl-line-mode)
+  )
 (use-package avy :ensure t
   :commands (avy-goto-word-1))
 (use-package swiper :ensure t)
@@ -174,7 +184,9 @@
     (kbd "C-d")     'evil-scroll-down
     (kbd "C-u")     'evil-scroll-up
     (kbd "C-w C-w") 'other-window)
-  
+
+ (with-eval-after-load 'evil
+    (defalias #'forward-evil-word #'forward-evil-symbol)) 
   (evil-mode)
   )
 (use-package ace-window
@@ -324,7 +336,7 @@
  '(company-quickhelp-color-foreground "#DCDCCC")
  '(custom-safe-themes
    (quote
-    ("599f1561d84229e02807c952919cd9b0fbaa97ace123851df84806b067666332" default)))
+    ("a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" "599f1561d84229e02807c952919cd9b0fbaa97ace123851df84806b067666332" default)))
  '(fci-rule-color "#383838")
  '(lsp-highlight-symbol-at-point nil)
  '(nrepl-message-colors
@@ -332,7 +344,7 @@
     ("#CC9393" "#DFAF8F" "#F0DFAF" "#7F9F7F" "#BFEBBF" "#93E0E3" "#94BFF3" "#DC8CC3")))
  '(package-selected-packages
    (quote
-    (company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
+    (yasnippet elpy company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(vc-annotate-background "#2B2B2B")
  '(vc-annotate-color-map

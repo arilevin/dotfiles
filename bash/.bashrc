@@ -30,6 +30,7 @@ alias gs='git status'
 alias gl="git log --graph --date-order --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
 alias gb='git branch'
 alias gd='git diff'
+alias gco='git checkout'
 alias gdc='git diff --cached'
 alias sdu="du -k * | sort -nr | cut -f2 | xargs -d '\n' du -sh"
 
