@@ -151,8 +151,8 @@
   :ensure t
   :config
   (load-theme 'zenburn t)
-  (global-hl-line-mode)
-  )
+  (global-hl-line-mode))
+
 (use-package avy :ensure t
   :commands (avy-goto-word-1))
 (use-package swiper :ensure t)
@@ -215,9 +215,11 @@
     (("C-x C-f" . helm-find-files)
      ("C-x b" . helm-buffers-list)
      ("M-x" . helm-M-x)
+     ("M-s s" . helm-occur)
      )
    :config
-   (setq helm-ff-file-name-history-use-recentf t)
+   (setq helm-ff-file-name-history-use-recentf t
+         helm-buffer-max-length 40)     ; make file name column wider
    (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 
    ;; Make Helm open at the bottom with height=40%
@@ -240,6 +242,8 @@
  (use-package helm-ag :ensure t
    :after helm
    :config
+   (setq helm-ag-insert-at-point 'symbol
+         helm-ag-use-agignore t)
    )
  (use-package helm-ls-git
    :ensure t
@@ -286,9 +290,10 @@
   :non-normal-prefix "C-SPC"
   "/" 'helm-do-ag
   "?" 'helm-do-ag-project-root
-  "b" '(:ignore t :which-key "buffers")
+  "b" '(:ignore t :which-key "buffers/bookmarks")
   "bb" 'helm-buffers-list
   "bk" 'kill-buffer  ; change buffer, chose using ivy
+  "bm" 'helm-bookmarks
   "f" '(:ignore t :which-key "files")
   "ff" 'helm-find-files
   "fr" 'helm-recentf
@@ -323,6 +328,7 @@
 
 
  (windmove-default-keybindings)
+ (xterm-mouse-mode)                     ; Enable the mouse in the terminal
 
  
 (custom-set-variables
@@ -375,7 +381,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(aw-leading-char-face ((t (:inherit ace-jump-face-foreground :height 3.0))))
- '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3")))))
+ '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3"))))
+ '(hl-line ((t (:background "#525252" :weight bold)))))
 
  (setq delete-old-versions -1 )          ; delete excess backup versions silently
  (setq version-control t )               ; use version control
