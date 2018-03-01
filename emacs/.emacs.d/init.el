@@ -266,6 +266,15 @@
              ))))))
 
 
+(defun my/toggle-maximize-buffer () "Maximize buffer"
+       (interactive)
+       (if (= 1 (length (window-list)))
+           (jump-to-register '_)
+         (progn
+           (window-configuration-to-register '_)
+                 (delete-other-windows))))
+
+
  (general-define-key
   ;; replace default keybindings
   ;; "C-s" 'swiper
@@ -307,6 +316,7 @@
   "wj" 'evil-window-down
   "wh" 'evil-window-left
   "wl" 'evil-window-right
+  "wm" 'my/toggle-maximize-buffer
   "SPC" 'avy-goto-word-1
   "."  'helm-mini
   "," 'helm-browse-project
