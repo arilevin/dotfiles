@@ -154,7 +154,7 @@
 
 (use-package avy :ensure t
   :commands (avy-goto-word-1))
-(use-package swiper :ensure t)
+;; (use-package swiper :ensure t)
 (use-package which-key
   :ensure t
   :diminish which-key-mode
