@@ -36,6 +36,7 @@ alias sdu="du -k * | sort -nr | cut -f2 | xargs -d '\n' du -sh"
 alias gittop="git rev-parse --show-toplevel"
 alias reload='source ~/.bashrc'
 
+
 function f {
     find . -iname "*$1*"
 }
@@ -124,6 +125,36 @@ blue=$(tput setaf 4)
 bold=$(tput bold)
 red=$(tput setaf 1)
 reset=$(tput sgr0)
-PS1='[\[$green\]\h\[$reset\]:\w\[$red\]$(__git_ps1)\[$reset\]]$ '
 
+function setPS1()
+{
+	# Reset
+	local Reset='\[\e[0m\]'             # Text Reset
 
+	# Regular s
+	local Black='\[\e[0;30m\]'        # Black
+	local Red='\[\e[0;31m\]'          # Red
+	local Green='\[\e[0;32m\]'        # Green
+	local Yellow='\[\e[0;33m\]'       # Yellow
+	local Blue='\[\e[0;34m\]'         # Blue
+	local Purple='\[\e[0;35m\]'       # Purple
+	local Cyan='\[\e[0;36m\]'         # Cyan
+	local White='\[\e[0;37m\]'        # White
+
+	# Bold
+	local BBlack='\[\e[1;30m\]'       # Black
+	local BRed='\[\e[1;31m\]'         # Red
+	local BGreen='\[\e[1;32m\]'       # Green
+	local BYellow='\[\e[1;33m\]'      # Yellow
+	local BBlue='\[\e[1;34m\]'        # Blue
+	local BPurple='\[\e[1;35m\]'      # Purple
+	local BCyan='\[\e[1;36m\]'        # Cyan
+	local BWhite='\[\e[1;37m\]'       # White
+
+	local ColorArray=($BRed $BGreen $BYellow $BBlue $BCyan $BRed $BGreen $BBlue $BYellow $BCyan)     # Need 10 options since there's no modulo
+	local ColorForHost=${ColorArray[$(echo "${USER}@${HOSTNAME}" | md5sum | sed s/[abcdef]*// | head -c 1)]}  # get first single digit from hash
+
+	export PS1="[${ColorForHost}\h ${BBlue}\w]${Red}\$(__git_ps1)${Reset} $ "
+}
+
+setPS1
