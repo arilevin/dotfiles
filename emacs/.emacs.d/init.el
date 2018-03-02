@@ -44,30 +44,36 @@
 (global-set-key (kbd "<C-right>") 'enlarge-window-horizontally)
 
 ;; c/c++ config
-(require 'cc-mode)
-(setq c-default-style "linux"
-      c-basic-offset 4)
-(setq-default indent-tabs-mode nil)   ;; no tabs
-;; (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; Open .h files in c++-mode
-(define-key c-mode-base-map (kbd "RET") 'newline-and-indent)
-(setq compilation-ask-about-save nil)
-(defun my/compilation-popup ()
-  (interactive)
-  (popwin:popup-buffer "*compilation*" :stick t :height 30))
+(use-package cc-mode
+  :defer t
+  :config
+    (setq c-default-style "linux"
+        c-basic-offset 4)
+    (setq-default indent-tabs-mode nil)   ;; no tabs
+    (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; Open .h files in c++-mode
+    (define-key c-mode-base-map (kbd "RET") 'newline-and-indent)
+    (setq compilation-ask-about-save nil)
+    (defun my/compilation-popup ()
+    (interactive)
+    (popwin:popup-buffer "*compilation*" :stick t :height 30))
+)
 
 ;; (use-package lsp-mode
 ;;   :ensure t
+;;   :defer t
 ;;   )
-
 ;; (use-package company
 ;;   :ensure t)
 ;; (use-package company-lsp
+;;   :after lsp-mode
 ;;   :ensure t
 ;;   :config
 ;;   (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil)
 ;;   )
+
 (use-package flycheck
   :ensure t
+  :after lsp-mode
   )
 (use-package markdown-mode             ; Apparently required by lsp-ui
   :ensure t)
@@ -78,7 +84,6 @@
 ;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
 ;;   )
 
-;; (use-package cquery
 ;;   :ensure t
 ;;   :after evil
 ;;   :config
@@ -119,6 +124,7 @@
 ;;
 (use-package org
   :ensure t
+  :defer t
   :config
   (define-key global-map "\C-cl" 'org-store-link)
   (define-key global-map "\C-ca" 'org-agenda)
@@ -155,7 +161,7 @@
 
 (use-package avy :ensure t
   :commands (avy-goto-word-1))
-(use-package swiper :ensure t)
+;; (use-package swiper :ensure t)
 (use-package which-key
   :ensure t
   :diminish which-key-mode
@@ -293,6 +299,15 @@
              ))))))
 
 
+(defun my/toggle-maximize-buffer () "Maximize buffer"
+       (interactive)
+       (if (= 1 (length (window-list)))
+           (jump-to-register '_)
+         (progn
+           (window-configuration-to-register '_)
+                 (delete-other-windows))))
+
+
  (general-define-key
   ;; replace default keybindings
   ;; "C-s" 'swiper
@@ -330,6 +345,8 @@
   "gL" 'magit-log
   "c" 'compile
   "w" '(:ignore t :which-key "window")
+  "wo" 'ace-window
+  "wm" 'my/toggle-maximize-buffer
   "wc" 'delete-window
   "wd" 'delete-window
   "ws" 'evil-window-split
@@ -338,14 +355,10 @@
   "wj" 'evil-window-down
   "wh" 'evil-window-left
   "wl" 'evil-window-right
-  "wo" 'ace-window
   "SPC" 'avy-goto-word-1
   "."  'helm-mini
   "," 'helm-browse-project
   "'" 'my/compilation-popup
-  ;; "bb" 'ivy-switch-buffer
-  ;; "ff" 'counsel-find-file  ; find file using ivy
-  ;; "/" 'counsel-git-grep   ;find string in git project
   )
 
 
