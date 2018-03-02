@@ -193,7 +193,6 @@
   :ensure t
   :init
   (progn
-    (global-set-key [remap other-window] 'ace-window)
     (custom-set-faces
      '(aw-leading-char-face
        ((t (:inherit ace-jump-face-foreground :height 3.0)))))
@@ -255,6 +254,24 @@
   :config
   (global-evil-surround-mode 1))
 
+(use-package golden-ratio
+  :ensure t
+  :config
+  (setq golden-ratio-extra-commands
+        (append golden-ratio-extra-commands
+                '(evil-window-left
+                  evil-window-right
+                  evil-window-up
+                  evil-window-down
+                  select-window-1
+                  select-window-2
+                  select-window-3
+                  select-window-4
+                  select-window-5
+                  ace-window)))
+  (golden-ratio-mode 1)
+  )
+
  (defun xah-comment-dwim ()
    "Like `comment-dwim', but toggle comment if cursor is not at end of line.
 
@@ -290,6 +307,8 @@
   :non-normal-prefix "C-SPC"
   "/" 'helm-do-ag
   "?" 'helm-do-ag-project-root
+  "x" '(:ignore t :which-key "text")
+  "xa" 'align-regexp
   "b" '(:ignore t :which-key "buffers/bookmarks")
   "bb" 'helm-buffers-list
   "bk" 'kill-buffer  ; change buffer, chose using ivy
@@ -297,11 +316,13 @@
   "f" '(:ignore t :which-key "files")
   "ff" 'helm-find-files
   "fr" 'helm-recentf
+  "fo" 'ff-find-other-file
   "fs" 'save-buffer
   "p" '(:ignore t :which-key "project")
   "pf" '(counsel-git :which-key "find file in git dir")        ; find file in git project
   "h" '(:ignore t :which-key "help")
   "ha" 'helm-apropos
+  "hr" 'helm-resume
   "g" '(:ignore t :which-key "git")
   "gs" 'magit-status
   "gb" 'magit-blame
@@ -317,6 +338,7 @@
   "wj" 'evil-window-down
   "wh" 'evil-window-left
   "wl" 'evil-window-right
+  "wo" 'ace-window
   "SPC" 'avy-goto-word-1
   "."  'helm-mini
   "," 'helm-browse-project
