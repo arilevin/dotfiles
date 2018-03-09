@@ -38,10 +38,21 @@
 (setq scroll-step 1)
 (setq scroll-conservatively 10000)
 (setq auto-window-vscroll nil)
-(global-set-key (kbd "<C-up>") 'shrink-window)
-(global-set-key (kbd "<C-down>") 'enlarge-window)
-(global-set-key (kbd "<C-left>") 'shrink-window-horizontally)
-(global-set-key (kbd "<C-right>") 'enlarge-window-horizontally)
+
+(use-package windsize
+  :ensure t
+  :config
+  (setq windsize-cols 2
+        windsize-rows 1)
+  (global-set-key (kbd "<C-up>") 'windsize-up)
+  (global-set-key (kbd "<C-down>") 'windsize-down)
+  (global-set-key (kbd "<C-left>") 'windsize-left)
+  (global-set-key (kbd "<C-right>") 'windsize-right)
+  )
+
+
+ (windmove-default-keybindings)
+ (xterm-mouse-mode)                     ; Enable the mouse in the terminal
 
 ;; c/c++ config
 (use-package cc-mode
@@ -54,8 +65,8 @@
     (define-key c-mode-base-map (kbd "RET") 'newline-and-indent)
     (setq compilation-ask-about-save nil)
     (defun my/compilation-popup ()
-    (interactive)
-    (popwin:popup-buffer "*compilation*" :stick t :height 30))
+      (interactive)
+      (popwin:popup-buffer "*compilation*" :stick t :height 30))
 )
 
 ;; (use-package lsp-mode
@@ -104,15 +115,21 @@
 ;;   (add-hook 'c-mode-common-hook #'cquery//enable)
 ;;   )
 
-(use-package helm-xref
-  :ensure t
-  :config
-  (setq xref-show-xrefs-function 'helm-xref-show-xrefs)
-  )
+;; (use-package helm-xref
+;;   :ensure t
+;;   :config
+;;   (setq xref-show-xrefs-function 'helm-xref-show-xrefs)
+;;   )
 
 
 (use-package yasnippet
-  :ensure t)
+  :ensure t
+  :config
+  (yas-global-mode 1)
+  )
+(use-package auto-yasnippet :ensure t)
+
+
 (use-package elpy
   :ensure t
   :config
@@ -143,16 +160,8 @@
   (popwin-mode 1)
   )
 
-;; (use-package smex :ensure t
-;;   :config
-;;   (smex-initialize))
-(use-package try :ensure t
-  :defer t
-  :config (message "Loaded try"))
-(use-package general :ensure t
-  :config
-  ;; (general-define-key "C-'" 'avy-goto-word-1)
-  )
+(use-package try :ensure t :defer t)
+(use-package general :ensure t)
 (use-package zenburn-theme
   :ensure t
   :config
@@ -161,7 +170,7 @@
 
 (use-package avy :ensure t
   :commands (avy-goto-word-1))
-;; (use-package swiper :ensure t)
+
 (use-package which-key
   :ensure t
   :diminish which-key-mode
@@ -195,14 +204,16 @@
     (defalias #'forward-evil-word #'forward-evil-symbol)) 
   (evil-mode)
   )
+
 (use-package ace-window
   :ensure t
-  :init
-  (progn
-    (custom-set-faces
-     '(aw-leading-char-face
-       ((t (:inherit ace-jump-face-foreground :height 3.0)))))
-    ))
+  :defer 1
+  :config
+  (set-face-attribute 'aw-leading-char-face nil :foreground "deep sky blue" :weight 'bold :height 5.0)
+  )
+
+
+(use-package hydra :ensure t)
 
 (use-package magit
   :ensure t
@@ -262,6 +273,7 @@
 
 (use-package golden-ratio
   :ensure t
+  :defer 1
   :config
   (setq golden-ratio-extra-commands
         (append golden-ratio-extra-commands
@@ -275,7 +287,7 @@
                   select-window-4
                   select-window-5
                   ace-window)))
-  (golden-ratio-mode 1)
+  ;; (golden-ratio-mode 1)
   )
 
  (defun xah-comment-dwim ()
@@ -322,28 +334,40 @@
   :non-normal-prefix "C-SPC"
   "/" 'helm-do-ag
   "?" 'helm-do-ag-project-root
+
   "x" '(:ignore t :which-key "text")
   "xa" 'align-regexp
+
   "b" '(:ignore t :which-key "buffers/bookmarks")
   "bb" 'helm-buffers-list
   "bk" 'kill-buffer  ; change buffer, chose using ivy
   "bm" 'helm-bookmarks
+
   "f" '(:ignore t :which-key "files")
   "ff" 'helm-find-files
   "fr" 'helm-recentf
   "fo" 'ff-find-other-file
   "fs" 'save-buffer
+
+  "s" '(:ignore t :which-key "snippets")
+  "sc" 'aya-create
+  "se" 'aya-expand
+
   "p" '(:ignore t :which-key "project")
   "pf" '(counsel-git :which-key "find file in git dir")        ; find file in git project
+
   "h" '(:ignore t :which-key "help")
   "ha" 'helm-apropos
   "hr" 'helm-resume
+
   "g" '(:ignore t :which-key "git")
   "gs" 'magit-status
   "gb" 'magit-blame
   "gl" 'magit-log-head
   "gL" 'magit-log
+
   "c" 'compile
+
   "w" '(:ignore t :which-key "window")
   "wo" 'ace-window
   "wm" 'my/toggle-maximize-buffer
@@ -355,6 +379,7 @@
   "wj" 'evil-window-down
   "wh" 'evil-window-left
   "wl" 'evil-window-right
+
   "SPC" 'avy-goto-word-1
   "."  'helm-mini
   "," 'helm-browse-project
@@ -362,8 +387,6 @@
   )
 
 
- (windmove-default-keybindings)
- (xterm-mouse-mode)                     ; Enable the mouse in the terminal
 
  
 (custom-set-variables
@@ -416,8 +439,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(aw-leading-char-face ((t (:inherit ace-jump-face-foreground :height 3.0))))
- '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3"))))
- '(hl-line ((t (:background "#525252" :weight bold)))))
+ '(hl-line ((t (:background "#525252" :weight bold))))
+ '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3")))))
 
  (setq delete-old-versions -1 )          ; delete excess backup versions silently
  (setq version-control t )               ; use version control
