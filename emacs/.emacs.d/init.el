@@ -87,7 +87,8 @@
   :after lsp-mode
   )
 (use-package markdown-mode             ; Apparently required by lsp-ui
-  :ensure t)
+  :ensure t
+  :defer)
 ;; (use-package lsp-ui
 ;;   :ensure t
 ;;   :after lsp-mode
@@ -131,6 +132,7 @@
 
 
 (use-package elpy
+  :defer
   :ensure t
   :config
   (elpy-enable)
@@ -167,6 +169,7 @@
   :config
   (load-theme 'zenburn t)
   (global-hl-line-mode))
+
 
 (use-package avy :ensure t
   :commands (avy-goto-word-1))
@@ -268,6 +271,7 @@
   ) 
 (use-package evil-surround
   :ensure t
+  :after evil
   :config
   (global-evil-surround-mode 1))
 
@@ -400,7 +404,7 @@
  '(company-quickhelp-color-foreground "#DCDCCC")
  '(custom-safe-themes
    (quote
-    ("a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" "599f1561d84229e02807c952919cd9b0fbaa97ace123851df84806b067666332" default)))
+    ("12b204c8fcce23885ce58e1031a137c5a14461c6c7e1db81998222f8908006af" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" "599f1561d84229e02807c952919cd9b0fbaa97ace123851df84806b067666332" default)))
  '(fci-rule-color "#383838")
  '(lsp-highlight-symbol-at-point nil)
  '(nrepl-message-colors
@@ -408,7 +412,7 @@
     ("#CC9393" "#DFAF8F" "#F0DFAF" "#7F9F7F" "#BFEBBF" "#93E0E3" "#94BFF3" "#DC8CC3")))
  '(package-selected-packages
    (quote
-    (yasnippet elpy company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
+    (solarized-theme yasnippet elpy company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(vc-annotate-background "#2B2B2B")
  '(vc-annotate-color-map
