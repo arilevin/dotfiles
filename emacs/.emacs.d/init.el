@@ -39,6 +39,17 @@
 (setq scroll-conservatively 10000)
 (setq auto-window-vscroll nil)
 
+(setq shell-command-switch "-ic") ;; Run shell interactively to source .bashrc
+
+
+(use-package smart-mode-line
+  :ensure t
+  :config
+  (setq sml/no-confirm-load-theme t)
+  (sml/setup)
+  )
+
+
 (use-package windsize
   :ensure t
   :config
@@ -168,7 +179,18 @@
   :ensure t
   :config
   (load-theme 'zenburn t)
-  (global-hl-line-mode))
+  (global-hl-line-mode)
+  (zenburn-with-color-variables
+    (custom-theme-set-faces
+     'zenburn
+     `(mode-line-inactive
+       ((t (:foreground ,zenburn-green-1
+  			:background ,zenburn-bg+05
+  			:box (:line-width -1 :style released-button)))))
+
+     '(hl-line ((t (:background "#525252"))))
+     ))
+  )
 
 
 (use-package avy :ensure t
@@ -402,9 +424,6 @@
  '(company-lsp-cache-candidates nil)
  '(company-quickhelp-color-background "#4F4F4F")
  '(company-quickhelp-color-foreground "#DCDCCC")
- '(custom-safe-themes
-   (quote
-    ("12b204c8fcce23885ce58e1031a137c5a14461c6c7e1db81998222f8908006af" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" "599f1561d84229e02807c952919cd9b0fbaa97ace123851df84806b067666332" default)))
  '(fci-rule-color "#383838")
  '(lsp-highlight-symbol-at-point nil)
  '(nrepl-message-colors
@@ -437,13 +456,14 @@
      (360 . "#DC8CC3"))))
  '(vc-annotate-very-old-color "#DC8CC3"))
  
+
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(aw-leading-char-face ((t (:inherit ace-jump-face-foreground :height 3.0))))
- '(hl-line ((t (:background "#525252" :weight bold))))
  '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3")))))
 
  (setq delete-old-versions -1 )          ; delete excess backup versions silently
