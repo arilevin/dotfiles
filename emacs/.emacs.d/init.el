@@ -35,9 +35,12 @@
 ;; Disable toolbar and menu bar
 (tool-bar-mode -1)
 (menu-bar-mode -1)
-(setq scroll-step 1)
+
+(column-number-mode)
+(setq scroll-preserve-screen-position t)
 (setq scroll-conservatively 10000)
-(setq auto-window-vscroll nil)
+(setq scroll-margin 5)
+(setq bookmark-save-flag 1)  ;; save bookmarks after every operation
 
 (setq shell-command-switch "-ic") ;; Run shell interactively to source .bashrc
 
@@ -49,6 +52,11 @@
   (sml/setup)
   )
 
+(use-package symbol-overlay
+  :ensure t
+  :config
+  (global-set-key (kbd "M-i") 'symbol-overlay-put)
+  )
 
 (use-package windsize
   :ensure t
@@ -78,6 +86,16 @@
     (defun my/compilation-popup ()
       (interactive)
       (popwin:popup-buffer "*compilation*" :stick t :height 30))
+    
+    ;; Make ff-find-other-file work for my file types
+    (setq-default ff-other-file-alist
+                  '(
+                    ("\\.*_inl\\.h\\'" (".h"))
+                    ("\\.h\\'" ("_inl.h" ".cpp" ".c"))
+                    ("\\.cpp\\'" (".h"))
+                    ("\\.c\\'" (".h"))
+                    )
+                  )
 )
 
 ;; (use-package lsp-mode
@@ -125,12 +143,6 @@
 ;;                  (locate-dominating-file default-directory ".cquery")))
 ;;       (lsp-cquery-enable)))
 ;;   (add-hook 'c-mode-common-hook #'cquery//enable)
-;;   )
-
-;; (use-package helm-xref
-;;   :ensure t
-;;   :config
-;;   (setq xref-show-xrefs-function 'helm-xref-show-xrefs)
 ;;   )
 
 
@@ -265,11 +277,11 @@
 
    ;; Make Helm open at the bottom with height=40%
    ;; From https://www.reddit.com/r/emacs/comments/345vtl/make_helm_window_at_the_bottom_without_using_any/
-   (add-to-list 'display-buffer-alist
- 	       `(,(rx bos "*helm" (* not-newline) "*" eos)
- 		 (display-buffer-in-side-window)
- 		 (inhibit-same-window . t)
- 		 (window-height . 0.4)))
+   ;; (add-to-list 'display-buffer-alist
+   ;; 	       `(,(rx bos "*helm" (* not-newline) "*" eos)
+   ;; 		 (display-buffer-in-side-window)
+   ;; 		 (inhibit-same-window . t)
+   ;; 		 (window-height . 0.4)))
 
    (helm-mode 1)
 
@@ -279,6 +291,39 @@
    (define-key helm-map (kbd "C-k") 'helm-previous-line)
    (define-key helm-find-files-map (kbd "C-h") 'helm-find-files-up-one-level)
    ;; (define-key helm-find-files-map (kbd "C-l") 'helm-execute-persistent-action)
+
+   ;; XXX experiment
+   (setq helm-split-window-in-side-p t ;; open helm buffer inside current window, not occupy whole other window
+
+	 helm-echo-input-in-header-line t
+	 helm-display-header-line t) ;; input close to where I type
+
+   ;; This doesn't seem to work in the terminal
+   ;; (defun helm-toggle-header-line ()
+   ;;   (if (= (length helm-sources) 1)
+   ;; 	 (set-face-attribute 'helm-source-header nil :height 0.5)
+   ;;     (set-face-attribute 'helm-source-header nil :height 1.0)))
+
+   ;; (add-hook 'helm-before-initialize-hook 'helm-toggle-header-line)
+
+
+   ;; (defun spacemacs//helm-hide-minibuffer-maybe ()
+   ;;   "Hide minibuffer in Helm session if we use the header line as input field."
+   ;;   (when (with-helm-buffer helm-echo-input-in-header-line)
+   ;;     (let ((ov (make-overlay (point-min) (point-max) nil nil t)))
+   ;;       (overlay-put ov 'window (selected-window))
+   ;;       (overlay-put ov 'face
+   ;;      	      (let ((bg-color (face-background 'default nil)))
+   ;;      		`(:background ,bg-color :foreground ,bg-color)))
+   ;;       (setq-local cursor-type nil))))
+
+   ;; (add-hook 'helm-minibuffer-set-up-hook
+   ;;           'spacemacs//helm-hide-minibuffer-maybe)
+
+   ;; (setq helm-autoresize-max-height 30)
+   ;; (setq helm-autoresize-min-height 20)
+   ;; (helm-autoresize-mode 1)
+
    )
  (use-package helm-ag :ensure t
    :after helm
@@ -431,7 +476,7 @@
     ("#CC9393" "#DFAF8F" "#F0DFAF" "#7F9F7F" "#BFEBBF" "#93E0E3" "#94BFF3" "#DC8CC3")))
  '(package-selected-packages
    (quote
-    (solarized-theme yasnippet elpy company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
+    (symbol-overlay solarized-theme yasnippet elpy company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(vc-annotate-background "#2B2B2B")
  '(vc-annotate-color-map
@@ -463,8 +508,13 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(avy-lead-face ((t (:background "#3F3F3F" :foreground "color-81" :inverse-video nil :weight bold))))
+ '(avy-lead-face-0 ((t (:background "#3F3F3F" :foreground "color-220" :inverse-video nil :weight bold))))
+ '(avy-lead-face-1 ((t (:background "#3F3F3F" :foreground "green" :inverse-video nil :weight bold))))
+ '(avy-lead-face-2 ((t (:background "#3F3F3F" :foreground "#DCA3A3" :inverse-video nil :weight bold))))
  '(aw-leading-char-face ((t (:inherit ace-jump-face-foreground :height 3.0))))
- '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3")))))
+ '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3"))))
+ '(which-func ((t (:foreground "yellow")))))
 
  (setq delete-old-versions -1 )          ; delete excess backup versions silently
  (setq version-control t )               ; use version control
