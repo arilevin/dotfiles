@@ -12,8 +12,8 @@ fi
 # R = colors (ansi escapes); F = don't page if text fits in window; i = case insensitive search
 export LESS='-Ri'
 export GIT_PAGER='less -Ri'
-export EDITOR=vim
-export VISUAL=vim
+export EDITOR='emacs -nw'
+export VISUAL=emacs
 
 # Set the ls colors. Dircolors returns presets that look better than the default
 eval $(dircolors)
