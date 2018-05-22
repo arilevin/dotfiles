@@ -106,6 +106,7 @@
                   )
 )
 
+
 ;; (use-package lsp-mode
 ;;   :ensure t
 ;;   :defer t
@@ -156,6 +157,7 @@
 
 (use-package yasnippet
   :ensure t
+  :diminish yas-minor-mode
   :config
   (yas-global-mode 1)
   )
@@ -172,9 +174,20 @@
 ;;
 ;; Org mode
 ;;
+(defun my/tasks-popup ()
+  (interactive)
+  (let (height popwin:popup-window-height)
+    (setq popwin:popup-window-height 30)
+    (popwin:find-file "~/org/tasks.org")
+    (setq popwin:popup-window-height height)
+    )
+  )
+
 (use-package org
   :ensure t
   :defer t
+  :init
+  (define-key global-map "\C-cc" 'org-capture)
   :config
   (define-key global-map "\C-cl" 'org-store-link)
   (define-key global-map "\C-ca" 'org-agenda)
@@ -184,11 +197,11 @@
         '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
   (setq org-log-done t)
   (setq org-default-notes-file "~/org/notes.org")
-  (define-key global-map "\C-cc" 'org-capture)
   (setq org-capture-templates
 	'(("t" "Task" entry (file "~/org/tasks.org") "* TODO %?\n %i\n %a")
 	  ("n" "Note" entry (file "~/org/notes.org") "* %?" )
 	  ))
+  (setq org-startup-indented t)
   )
 
 
@@ -268,9 +281,23 @@
   :ensure t
   :defer t
   )
+
 (use-package evil-magit
   :ensure t
   :after magit
+  )
+
+(use-package diminish
+  :ensure t
+  )
+
+;; These two are built in but I'm using use-package because I couldn't figure
+;; out how else to diminish them
+(use-package undo-tree
+  :diminish undo-tree-mode
+  )
+(use-package abbrev
+  :diminish abbrev-mode
   )
 
  (use-package helm
@@ -431,6 +458,9 @@
   "fr" 'helm-recentf
   "fo" 'ff-find-other-file
   "fs" 'save-buffer
+  "fi" '(lambda () (interactive) (find-file "~/.emacs.d/init.el"))
+
+  "t" 'my/tasks-popup
 
   "s" '(:ignore t :which-key "snippets")
   "sc" 'aya-create
