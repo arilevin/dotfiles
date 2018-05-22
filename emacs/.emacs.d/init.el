@@ -76,11 +76,12 @@
 ;; c/c++ config
 (use-package cc-mode
   :defer t
+  :init
+  (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; Open .h files in c++-mode
   :config
     (setq c-default-style "linux"
         c-basic-offset 4)
     (setq-default indent-tabs-mode nil)   ;; no tabs
-    (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) ; Open .h files in c++-mode
     (define-key c-mode-base-map (kbd "RET") 'newline-and-indent)
     (setq compilation-ask-about-save nil)
     (defun my/compilation-popup ()
@@ -170,13 +171,17 @@
   :config
   (define-key global-map "\C-cl" 'org-store-link)
   (define-key global-map "\C-ca" 'org-agenda)
-  (setq org-agenda-files (list "~/todo.org"
-                               "~/foo.org"))
+  (setq org-agenda-files (list "~/org/tasks.org"
+                               "~/org/notes.org"))
   (setq org-todo-keywords
         '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
   (setq org-log-done t)
-  (setq org-default-notes-file "~/notes.org")
+  (setq org-default-notes-file "~/org/notes.org")
   (define-key global-map "\C-cc" 'org-capture)
+  (setq org-capture-templates
+	'(("t" "Task" entry (file "~/org/tasks.org") "* TODO %?\n %i\n %a")
+	  ("n" "Note" entry (file "~/org/notes.org") "* %?" )
+	  ))
   )
 
 
@@ -474,6 +479,7 @@
  '(nrepl-message-colors
    (quote
     ("#CC9393" "#DFAF8F" "#F0DFAF" "#7F9F7F" "#BFEBBF" "#93E0E3" "#94BFF3" "#DC8CC3")))
+ '(org-agenda-files (quote ("~/org/notes.org")))
  '(package-selected-packages
    (quote
     (symbol-overlay solarized-theme yasnippet elpy company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
