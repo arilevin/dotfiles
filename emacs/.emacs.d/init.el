@@ -36,6 +36,13 @@
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 
+
+(eval-after-load "tramp"
+  (lambda ()
+       (setq tramp-remote-path '("/usr/local/bin" "/usr/local/sbin" tramp-default-remote-path "/bin" "/usr/bin" "/sbin" "/usr/sbin"  "/local/bin" "/local/freeware/bin" "/local/gnu/bin" "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin" "/opt/bin" "/opt/sbin" "/opt/local/bin")))
+    ;; (add-to-list 'tramp-remote-path "/usr/local/bin" ))
+  )
+
 (column-number-mode)
 (setq scroll-preserve-screen-position t)
 (setq scroll-conservatively 10000)
