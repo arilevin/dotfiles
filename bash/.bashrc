@@ -29,7 +29,8 @@ alias lla='ls -FGla --color'
 alias gs='git status'
 alias gl="git log --graph --date-order --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
 alias gb='git branch'
-alias gd='git diff'
+alias gd='git diff --ws-error-highlight=new,old'
+alias gdh='git diff HEAD^..HEAD'
 alias gco='git checkout'
 alias gdc='git diff --cached'
 alias gsu='git submodule update'
@@ -72,6 +73,11 @@ function bak {
     cp $1 "$1.bak";
 }
 
+# Highlight matching regex. Show all lines
+function hl {
+    GREP_COLORS=ne grep --color=always -P "$1|$"
+}
+
 # Print terminal colors with their names. Can be used e.g. in tmux
 function print_colors {
     for i in {0..255}; do 
@@ -90,6 +96,32 @@ function ediff {
     fi
 }
 
+# Time the given commands and append to the file in seconds
+function mytime {
+    /usr/bin/time -o ~/build_times.txt -a -f "%e" $@
+}
+
+# Ring bell. Useful if called from PS1 to notify
+# that a long command (e.g. a build) has finished
+function bell {
+    echo -n -e "\a"
+}
+
+function highlight() {
+	declare -A fg_color_map
+	fg_color_map[black]=30
+	fg_color_map[red]=31
+	fg_color_map[green]=32
+	fg_color_map[yellow]=33
+	fg_color_map[blue]=34
+	fg_color_map[magenta]=35
+	fg_color_map[cyan]=36
+	 
+	fg_c=$(echo -e "\e[1;${fg_color_map[$1]}m")
+	c_rs=$'\e[0m'
+	sed -u -r s"/$2/$fg_c\0$c_rs/g"
+}
+
 #function stow {
 #    /usr/bin/stow -t /usr/local $@
 #}
@@ -99,7 +131,10 @@ function ediff {
 #}
 
 # Disable the super annoying Ctrl+S that freezes the terminal
-stty -ixon
+if [[ $- == *i* ]]  # interactive shell
+then
+    stty -ixon
+fi
 
 # enable core files
 ulimit -c unlimited
@@ -121,12 +156,22 @@ export GIT_PS1_SHOWDIRTYSTATE=1
 export GIT_PS1_SHOWSTASHSTATE=1
 export GIT_PS1_SHOWUPSTREAM="auto"  # Show if you're ahead (>) or behind (<) upstream
 
-# Make prompt pretty
-green=$(tput setaf 2)
-blue=$(tput setaf 4)
-bold=$(tput bold)
-red=$(tput setaf 1)
-reset=$(tput sgr0)
+# # Make prompt pretty
+# green=$(tput setaf 2)
+# blue=$(tput setaf 4)
+# bold=$(tput bold)
+# red=$(tput setaf 1)
+# reset=$(tput sgr0)
+
+function my_git_branch_ps1 () {
+    local _branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null)
+    if [ -z "${_branch}" ]; then
+       echo ""
+    else
+        echo "($_branch) "
+    fi
+}
+
 
 function setPS1()
 {
@@ -156,7 +201,9 @@ function setPS1()
 	local ColorArray=($BRed $BGreen $BYellow $BBlue $BCyan $BRed $BGreen $BBlue $BYellow $BCyan)     # Need 10 options since there's no modulo
 	local ColorForHost=${ColorArray[$(echo "${USER}@${HOSTNAME}" | md5sum | sed s/[abcdef]*// | head -c 1)]}  # get first single digit from hash
 
-	export PS1="[${ColorForHost}\h ${BBlue}\w]${Red}\$(__git_ps1)${Reset} $ "
+	# export PS1="[${ColorForHost}\h ${BBlue}\w]${Red}\$(__git_ps1)${Reset} $ "
+	# export PS1="[${ColorForHost}\h ${BBlue}\w]${Reset} $ "
+	export PS1="[${ColorForHost}\h ${BBlue}\w] ${Red}\$(my_git_branch_ps1)${Reset}$ "
 }
 
 setPS1
