@@ -20,9 +20,86 @@
       package-user-dir "~/.emacs.d/elpa/")
 (setq package-archives '(("melpa"     . "https://melpa.org/packages/")
 			 ("org"       . "http://orgmode.org/elpa/")
-			 ("gnu"      . "http://elpa.gnu.org/packages/")
+			 ;; ("gnu"      . "http://elpa.gnu.org/packages/")
 			 ))
+
+
+
+
+
 (package-initialize)
+
+;;; Rtags support
+;; (setq package-directory-list '("/usr/local/share/emacs/site-lisp/rtags/"))
+(use-package company :ensure t)
+(use-package company-rtags
+  :load-path "/usr/local/share/emacs/site-lisp/rtags"
+  :config
+  (setq rtags-completions-enabled t)
+  (setq company-async-timeout 4)
+  (push 'company-rtags company-backends)
+  (global-company-mode)
+  (define-key c-mode-base-map (kbd "<backtab>") (function company-complete))
+  )
+
+(use-package rtags
+  :load-path "/usr/local/share/emacs/site-lisp/rtags"
+  ;; :init
+  ;; (add-hook 'c-mode-common-hook #'flycheck-mode)
+  :config
+  (setq rtags-display-result-backend 'helm)
+  (setq rtags-autostart-diagnostics t)
+  (rtags-diagnostics)
+
+  (rtags-enable-standard-keybindings)
+  ;; More keybindings under general-define-key because otherwise
+  ;; evil mode was shadowing them
+  )
+
+;; (use-package flycheck :ensure t :defer t
+;;   :init
+;;   (add-hook 'c-mode-common-hook #'flycheck-mode)
+;;   )
+
+;; (use-package flycheck-rtags
+;;   :load-path "/usr/local/share/emacs/site-lisp/rtags"
+;;   :config
+;;   (defun my-flycheck-rtags-setup ()
+;;     (flycheck-select-checker 'rtags)
+;;     (setq-local flycheck-highlighting-mode nil) ;; use rtags overlays
+;;     (setq-local flycheck-check-syntax-automatically nil))
+;;   ;; c-mode-common-hook is also called by c++-mode
+;;   (add-hook 'c-mode-common-hook #'my-flycheck-rtags-setup)
+;;   )
+
+
+;; (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/rtags")
+;; (require 'rtags)
+;; (require 'company)
+;; (require 'company-rtags)
+
+
+;; (setq rtags-display-result-backend 'helm)
+;; (setq rtags-autostart-diagnostics t)
+;; (setq rtags-completions-enabled t)
+;; (push 'company-rtags company-backends)
+
+;; (rtags-diagnostics)
+;; (global-company-mode)
+;; (rtags-enable-standard-keybindings)
+
+;; (define-key c-mode-base-map (kbd "<C-tab>") (function company-complete))
+
+;; (require 'flycheck-rtags)
+;; (defun my-flycheck-rtags-setup ()
+;;  (flycheck-select-checker 'rtags)
+;;  (setq-local flycheck-highlighting-mode nil) ;; use rtags overlays
+;;  (setq-local flycheck-check-syntax-automatically nil))
+;; ;; c-mode-common-hook is also called by c++-mode
+;; (add-hook 'c-mode-common-hook #'my-flycheck-rtags-setup)
+
+;;; end rtags
+
 
 ;; Bootstrap `use-package'
 (unless (package-installed-p 'use-package) ; unless it is already installed
@@ -36,6 +113,9 @@
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 
+; Highlight matching parens
+(show-paren-mode)
+
 
 (eval-after-load "tramp"
   (lambda ()
@@ -46,10 +126,10 @@
 (column-number-mode)
 (setq scroll-preserve-screen-position t)
 (setq scroll-conservatively 10000)
-(setq scroll-margin 5)
+(setq scroll-margin 0)
 (setq bookmark-save-flag 1)  ;; save bookmarks after every operation
 
-(setq shell-command-switch "-ic") ;; Run shell interactively to source .bashrc
+;; (setq shell-command-switch "-ic") ;; Run shell interactively to source .bashrc
 
 
 (use-package smart-mode-line
@@ -80,6 +160,11 @@
  (windmove-default-keybindings)
  (xterm-mouse-mode)                     ; Enable the mouse in the terminal
 
+(use-package transpose-frame
+  :ensure t)
+
+
+
 ;; c/c++ config
 (use-package cc-mode
   :defer t
@@ -89,12 +174,20 @@
     (setq c-default-style "linux"
         c-basic-offset 4)
     (setq-default indent-tabs-mode nil)   ;; no tabs
+    (setq-default show-trailing-whitespace t)
     (define-key c-mode-base-map (kbd "RET") 'newline-and-indent)
     (setq compilation-ask-about-save nil)
+    (setq compilation-scroll-output 'first-error)
+    (setq compilation-skip-threshold 2)
     (defun my/compilation-popup ()
       (interactive)
-      (popwin:popup-buffer "*compilation*" :stick t :height 30))
-    
+      (popwin:popup-buffer "*compilation*" :stick t :height 35))
+
+    (defun my/compile-in-toplevel ()
+      (interactive)
+      (let ((default-directory (vc-root-dir)))
+        (call-interactively #'compile)))
+
     ;; Make ff-find-other-file work for my file types
     (setq-default ff-other-file-alist
                   '(
@@ -119,6 +212,11 @@
 ;;   :config
 ;;   (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil)
 ;;   )
+
+
+(use-package visual-regexp :ensure t)
+(use-package visual-regexp-steroids :ensure t)
+
 
 (use-package flycheck
   :ensure t
@@ -153,6 +251,7 @@
 ;;       (lsp-cquery-enable)))
 ;;   (add-hook 'c-mode-common-hook #'cquery//enable)
 ;;   )
+
 
 
 (use-package yasnippet
@@ -200,13 +299,30 @@
   (setq org-capture-templates
 	'(("t" "Task" entry (file "~/org/tasks.org") "* TODO %?\n %i\n %a")
 	  ("n" "Note" entry (file "~/org/notes.org") "* %?" )
+          ("l" "Log work" entry (file "~/org/tasks.org") "* %T: %?  [[%l][(link)]]")
 	  ))
+  (add-hook 'org-capture-mode-hook 'evil-insert-state) ; capture templates drop you right into insert mode
+  (setq org-M-RET-may-split-line nil)  ;; makes it so you can hit M-RET anywhere in the line to split
   (setq org-startup-indented t)
+  (setq org-ellipsis " ▶")
+
+  ;; Refile settings
+  ;; https://blog.aaronbieber.com/2017/03/19/organizing-notes-with-refile.html
+  (setq org-refile-targets '((nil . (:maxlevel . 2))))
+  (setq org-refile-use-outline-path t)
+  (setq org-outline-path-complete-in-steps nil)  ; defaults to t and helm can't do the incremental completion
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-insert-heading-respect-content t) ; insert headings after subtree. Preserves folds
+
+
+  (add-hook 'org-insert-heading-hook 'evil-insert-state)
   )
 
 
 (use-package popwin :ensure t
   :config
+  (push '(help-mode :height 30) popwin:special-display-config)
+  (push '(compilation-mode :height 35 :stick t) popwin:special-display-config)
   (popwin-mode 1)
   )
 
@@ -231,7 +347,9 @@
 
 
 (use-package avy :ensure t
-  :commands (avy-goto-word-1))
+  :commands (avy-goto-word-1
+             avy-goto-char-timer)
+  )
 
 (use-package which-key
   :ensure t
@@ -244,9 +362,18 @@
         which-key-max-display-columns 7
         )
   )
+
+
 (use-package evil
   :ensure t
   :defer 0.02
+  :init
+
+  (setq evil-default-cursor (quote (t "#750000"))
+        evil-visual-state-cursor '("#880000" box)
+        evil-normal-state-cursor '("#750000" box)
+        evil-insert-state-cursor '("#e2e222" box)
+        )
   :config
   ;; Allow TAB to indent code in Normal mode
   (with-eval-after-load 'evil-maps
@@ -261,10 +388,17 @@
     (kbd "C-d")     'evil-scroll-down
     (kbd "C-u")     'evil-scroll-up
     (kbd "C-w C-w") 'other-window)
+  
 
  (with-eval-after-load 'evil
     (defalias #'forward-evil-word #'forward-evil-symbol)) 
   (evil-mode)
+  )
+
+(use-package evil-escape :ensure t
+  :after evil
+  :config
+  (evil-escape-mode)
   )
 
 (use-package ace-window
@@ -303,11 +437,12 @@
  (use-package helm
    :ensure t
    :diminish helm-mode
+   :commands (describe-mode describe-variable)
    :bind
     (("C-x C-f" . helm-find-files)
      ("C-x b" . helm-buffers-list)
      ("M-x" . helm-M-x)
-     ("M-s s" . helm-occur)
+     ("M-s" . helm-occur)
      )
    :config
    (setq helm-ff-file-name-history-use-recentf t
@@ -337,6 +472,7 @@
 	 helm-echo-input-in-header-line t
 	 helm-display-header-line t) ;; input close to where I type
 
+
    ;; This doesn't seem to work in the terminal
    ;; (defun helm-toggle-header-line ()
    ;;   (if (= (length helm-sources) 1)
@@ -364,22 +500,32 @@
    ;; (helm-autoresize-mode 1)
 
    )
+
+ (use-package ag :ensure t)
  (use-package helm-ag :ensure t
    :after helm
    :config
    (setq helm-ag-insert-at-point 'symbol
          helm-ag-use-agignore t)
+   (define-key helm-ag-mode-map (kbd "<tab>") 'helm-ag-mode-jump-other-window)
+   (define-key helm-ag-mode-map (kbd "<ret") 'helm-ag-mode-jump-other-window)
    )
  (use-package helm-ls-git
    :ensure t
    :after helm
    :defer t   ;; TODO how to mix the delayed load of :bind with use-package?
-  ) 
+   :config
+   ;; include submodules in file listing. --recurse-submodules needs newer git
+   (setq helm-ls-git-ls-switches '("ls-files" "--full-name" "--recurse-submodules" "--"))
+  )
 (use-package evil-surround
   :ensure t
   :after evil
   :config
   (global-evil-surround-mode 1))
+
+(use-package protobuf-mode
+  :ensure t)
 
 (use-package golden-ratio
   :ensure t
@@ -438,9 +584,11 @@
 
   )
 
+
  (general-define-key
   :states '(normal visual insert emacs)
   :prefix "SPC"
+  :keymaps 'override
   :non-normal-prefix "C-SPC"
   "/" 'helm-do-ag
   "?" 'helm-do-ag-project-root
@@ -448,30 +596,46 @@
   "x" '(:ignore t :which-key "text")
   "xa" 'align-regexp
 
+  "a" '(:ignore t :which-key "ag")
+  "a." 'ag-project-at-point
+  "ar" 'ag-regexp
+  "ap" 'ag-project-regexp
+
   "b" '(:ignore t :which-key "buffers/bookmarks")
   "bb" 'helm-buffers-list
   "bk" 'kill-buffer  ; change buffer, chose using ivy
   "bm" 'helm-bookmarks
+  "bc" '(clone-indirect-buffer-other-window :which-key "clone indirect")
 
   "f" '(:ignore t :which-key "files")
   "ff" 'helm-find-files
   "fr" 'helm-recentf
   "fo" 'ff-find-other-file
   "fs" 'save-buffer
-  "fi" '(lambda () (interactive) (find-file "~/.emacs.d/init.el"))
+  "fi" '((lambda () (interactive) (find-file "~/.emacs.d/init.el")) :which-key "init.el")
 
   "t" 'my/tasks-popup
 
-  "s" '(:ignore t :which-key "snippets")
+  "r" '(:ignore t :which-key "regexp search")
+  "r/" 'vr/isearch-forward
+  "r?" 'vr/isearch-backward
+  "rq" 'vr/query-replace
+
+  "s" '(:ignore t :which-key "snippets|search")
   "sc" 'aya-create
   "se" 'aya-expand
 
   "p" '(:ignore t :which-key "project")
   "pf" '(counsel-git :which-key "find file in git dir")        ; find file in git project
 
-  "h" '(:ignore t :which-key "help")
+  "h" '(:ignore t :which-key "helm")
   "ha" 'helm-apropos
   "hr" 'helm-resume
+
+  "l" '(:ignore t :whichk-key "highlight")
+  "lr" 'highlight-regexp
+  "l." 'highlight-symbol-at-point
+  "lu" 'unhighlight-regexp
 
   "g" '(:ignore t :which-key "git")
   "gs" 'magit-status
@@ -479,7 +643,7 @@
   "gl" 'magit-log-head
   "gL" 'magit-log
 
-  "c" 'compile
+  "c" 'my/compile-in-toplevel
 
   "w" '(:ignore t :which-key "window")
   "wo" 'ace-window
@@ -492,16 +656,32 @@
   "wj" 'evil-window-down
   "wh" 'evil-window-left
   "wl" 'evil-window-right
+  "wt" 'transpose-frame
+  "wf" 'flip-frame
+  "wF" 'flop-frame
+  "wr" 'rotate-frame-clockwise
+  "wR" 'rotate-frame-anticlockwise
 
+  "SPC" 'avy-goto-char-timer
   "SPC" 'avy-goto-word-1
   "."  'helm-mini
   "," 'helm-browse-project
   "'" 'my/compilation-popup
   )
 
+(general-define-key
+ :states '(normal visual insert emacs)
+ ;; :keymaps 'c++-mode-base-map
+  "M-." 'rtags-find-symbol-at-point
+  "M-," 'rtags-find-references-at-point
+  "M->" 'rtags-find-symbol
+  "M-<" 'rtags-find-references
+  "M-?" 'rtags-display-summary
+  "M-{" 'rtags-location-stack-back
+  "M-}" 'rtags-location-stack-forward
+  )
 
 
- 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -512,6 +692,9 @@
  '(company-quickhelp-color-background "#4F4F4F")
  '(company-quickhelp-color-foreground "#DCDCCC")
  '(fci-rule-color "#383838")
+ '(helm-source-names-using-follow
+   (quote
+    ("Search at ~/debesys/orders/sgx_titan/include/sgx_titan/" "Occur")))
  '(lsp-highlight-symbol-at-point nil)
  '(nrepl-message-colors
    (quote
@@ -519,7 +702,7 @@
  '(org-agenda-files (quote ("~/org/notes.org")))
  '(package-selected-packages
    (quote
-    (symbol-overlay solarized-theme yasnippet elpy company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
+    (evil-goggles w3m treemacs evil-escape protobuf-mode evil-terminal-cursor-changer symbol-overlay solarized-theme yasnippet elpy company-lsp company markdown-mode lsp-ui helm-xref cquery lsp-mode evil-surround windresize windsize esup beacon evil-magit magit helm-git-grep zoom-frm smex zenburn-theme which-key use-package try org-bullets hc-zenburn-theme general evil counsel ace-window)))
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(vc-annotate-background "#2B2B2B")
  '(vc-annotate-color-map
@@ -543,7 +726,7 @@
      (340 . "#94BFF3")
      (360 . "#DC8CC3"))))
  '(vc-annotate-very-old-color "#DC8CC3"))
- 
+
 
 
 (custom-set-faces
@@ -559,18 +742,18 @@
  '(lsp-face-highlight-textual ((t (:background "DarkGoldenrod3"))))
  '(which-func ((t (:foreground "yellow")))))
 
- (setq delete-old-versions -1 )          ; delete excess backup versions silently
- (setq version-control t )               ; use version control
- (setq vc-make-backup-files t )          ; make backups file even when in version controlled dir
- (setq backup-directory-alist `(("." . "~/.emacs.d/backups")) ) ; which directory to put backups file
- (setq vc-follow-symlinks t )		; don't ask for confirmation when opening symlinked file
- (setq auto-save-file-name-transforms `((".*" "~/.emacs.d/auto-save-list/" t)) ) ;transform backups file name
- (setq inhibit-startup-screen t )	; inhibit useless and old-school startup screen
- (setq ring-bell-function 'ignore )	; silent bell when you make a mistake
- (setq coding-system-for-read 'utf-8 )	; use utf-8 by default
- (setq coding-system-for-write 'utf-8 )
- (setq sentence-end-double-space nil)	; sentence SHOULD end with only a point.
- (setq default-fill-column 80)		; toggle wrapping text at the 80th character
- (defalias 'yes-or-no-p 'y-or-n-p)
- ;; (setq initial-scratch-message "Welcome in Emacs") ; print a default message in the empty scratch buffer opened at startup
+(setq delete-old-versions -1 )          ; delete excess backup versions silently
+(setq version-control t )               ; use version control
+(setq vc-make-backup-files t )          ; make backups file even when in version controlled dir
+(setq backup-directory-alist `(("." . "~/.emacs.d/backups")) ) ; which directory to put backups file
+(setq vc-follow-symlinks t )		; don't ask for confirmation when opening symlinked file
+(setq auto-save-file-name-transforms `((".*" "~/.emacs.d/auto-save-list/" t)) ) ;transform backups file name
+(setq inhibit-startup-screen t )	; inhibit useless and old-school startup screen
+(setq ring-bell-function 'ignore )	; silent bell when you make a mistake
+(setq coding-system-for-read 'utf-8 )	; use utf-8 by default
+(setq coding-system-for-write 'utf-8 )
+(setq sentence-end-double-space nil)	; sentence SHOULD end with only a point.
+(setq default-fill-column 80)		; toggle wrapping text at the 80th character
+(defalias 'yes-or-no-p 'y-or-n-p)
+
 (put 'narrow-to-region 'disabled nil)
